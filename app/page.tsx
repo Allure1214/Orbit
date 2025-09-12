@@ -36,6 +36,16 @@ export default async function HomePage() {
           </div>
         </div>
         
+        {/* Decorative Element */}
+        <div className="mt-16 flex justify-center">
+          <div className="relative w-64 h-32 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 rounded-full blur-2xl"></div>
+            <div className="absolute top-4 left-8 w-16 h-16 bg-blue-400/20 rounded-full blur-xl"></div>
+            <div className="absolute bottom-4 right-8 w-20 h-20 bg-purple-400/20 rounded-full blur-xl"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-r from-blue-300/30 to-purple-300/30 rounded-full blur-lg"></div>
+          </div>
+        </div>
+
         <div id="features" className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">

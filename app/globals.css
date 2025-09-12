@@ -116,3 +116,15 @@
 .gradient-bg {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
+
+/* Prevent oversized SVGs */
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Landing page specific styles */
+.landing-page svg {
+  max-width: 24px;
+  max-height: 24px;
+}
