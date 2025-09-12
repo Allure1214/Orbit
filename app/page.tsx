@@ -10,20 +10,20 @@ export default async function HomePage() {
   }
   
   return (
-    <div className="landing-page min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-6xl font-bold gradient-text mb-6">
             Orbit
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Your smart personal dashboard for productivity, insights, and personal management. 
             Track tasks, manage finances, stay informed, and achieve your goals.
           </p>
           <div className="space-x-4">
             <a
               href="/api/auth/signin"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
             >
               Get Started
             </a>
@@ -36,16 +36,6 @@ export default async function HomePage() {
           </div>
         </div>
         
-        {/* Decorative Element */}
-        <div className="mt-16 flex justify-center">
-          <div className="relative w-64 h-32 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 rounded-full blur-2xl"></div>
-            <div className="absolute top-4 left-8 w-16 h-16 bg-blue-400/20 rounded-full blur-xl"></div>
-            <div className="absolute bottom-4 right-8 w-20 h-20 bg-purple-400/20 rounded-full blur-xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-r from-blue-300/30 to-purple-300/30 rounded-full blur-lg"></div>
-          </div>
-        </div>
-
         <div id="features" className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
