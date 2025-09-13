@@ -49,7 +49,7 @@ export default function InteractiveHomePage() {
       </div>
 
       {/* Features Section - Now Interactive */}
-      <div className={`py-20 bg-white/5 backdrop-blur-sm transition-all duration-500 ${showFeatures ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
+      <div className={`bg-white/5 backdrop-blur-sm transition-all duration-500 ${showFeatures ? 'py-20 opacity-100 translate-y-0' : 'py-0 opacity-0 translate-y-10 pointer-events-none h-0 overflow-hidden'}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -130,28 +130,10 @@ export default function InteractiveHomePage() {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to get organized?
-          </h2>
-          <p className="text-xl text-white/70 mb-12 max-w-2xl mx-auto">
-            Join thousands of users who are transforming their productivity with Orbit.
-          </p>
-          <a
-            href="/api/auth/signin"
-            className="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-2xl"
-          >
-            Sign Up Now
-          </a>
-        </div>
-      </div>
-
       {/* Footer */}
       <div className="border-t border-white/10 py-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-white/50">© 2024 Orbit Dashboard. All rights reserved.</p>
+          <p className="text-white/50">© {new Date().getFullYear()} Orbit Dashboard. All rights reserved.</p>
         </div>
       </div>
     </div>
