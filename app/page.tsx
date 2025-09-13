@@ -10,104 +10,152 @@ export default async function HomePage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold gradient-text mb-6">
-            Orbit
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Your smart personal dashboard for productivity, insights, and personal management. 
-            Track tasks, manage finances, stay informed, and achieve your goals.
-          </p>
-          <div className="space-x-4">
-            <a
-              href="/api/auth/signin"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
-            >
-              Get Started
-            </a>
-            <a
-              href="#features"
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              Learn More
-            </a>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        
+        <div className="relative container mx-auto px-4 py-20">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
+              <span className="text-sm font-medium text-white/90">✨ Now Available</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 tracking-tight">
+              Orbit
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-white/80 mb-4 max-w-3xl mx-auto leading-relaxed">
+              Your Smart Personal Dashboard
+            </p>
+            
+            <p className="text-lg text-white/70 mb-12 max-w-2xl mx-auto">
+              Your one-stop hub for productivity, insights, and personal management. 
+              Stay organized, track goals, and make informed decisions.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/api/auth/signin"
+                className="inline-flex items-center px-8 py-4 bg-white text-slate-900 font-semibold rounded-xl hover:bg-white/90 transition-all duration-200 transform hover:scale-105 shadow-2xl"
+              >
+                Get Started Today
+              </a>
+              <a
+                href="#features"
+                className="inline-flex items-center px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+              >
+                Learn More
+              </a>
+            </div>
           </div>
         </div>
-        
-        <div id="features" className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Task Management</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Organize your tasks with deadlines, priorities, and calendar integration.
+      </div>
+
+      {/* Features Section */}
+      <div id="features" className="py-20 bg-white/5 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Everything you need to stay organized
+            </h2>
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+              Powerful features designed to boost your productivity and help you achieve your goals.
             </p>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Task Management */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-500/30 transition-colors">
+                <div className="text-2xl">📋</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Task Management</h3>
+              <p className="text-white/70 leading-relaxed">
+                Create, edit, and track tasks with deadlines and priorities. Never miss an important deadline again.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Finance Tracking</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Monitor expenses, set budgets, and get AI-powered financial insights.
-            </p>
-          </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+
+            {/* Finance Tracking */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-green-500/30 transition-colors">
+                <div className="text-2xl">💰</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Finance Tracking</h3>
+              <p className="text-white/70 leading-relaxed">
+                Track your income, budget, and expenses with category-based analytics and insights.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">AI Insights</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Get personalized daily summaries and intelligent recommendations.
-            </p>
-          </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-              </svg>
+
+            {/* Weather Widget */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/30 transition-colors">
+                <div className="text-2xl">🌤️</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Weather Widget</h3>
+              <p className="text-white/70 leading-relaxed">
+                Real-time local weather forecast with 7-day predictions to plan your activities.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Weather Widget</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Stay updated with real-time weather and 7-day forecasts.
-            </p>
-          </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
+
+            {/* AI Insights */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-purple-500/30 transition-colors">
+                <div className="text-2xl">⚡</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">AI Insights</h3>
+              <p className="text-white/70 leading-relaxed">
+                Get daily summaries and intelligent insights powered by AI to optimize your productivity.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">F1 Statistics</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Track Formula 1 races, standings, and driver statistics in real-time.
-            </p>
-          </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
+
+            {/* News & Trends */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-500/30 transition-colors">
+                <div className="text-2xl">📰</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">News & Trends</h3>
+              <p className="text-white/70 leading-relaxed">
+                Customizable news feed with AI-powered summarization to stay informed.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Achievements</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Unlock badges and track streaks to stay motivated and productive.
-            </p>
+
+            {/* Notes & Journal */}
+            <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-500/30 transition-colors">
+                <div className="text-2xl">📝</div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Notes & Journal</h3>
+              <p className="text-white/70 leading-relaxed">
+                Rich text notes with tags and a searchable archive for all your thoughts and ideas.
+              </p>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Ready to get organized?
+          </h2>
+          <p className="text-xl text-white/70 mb-12 max-w-2xl mx-auto">
+            Join thousands of users who are transforming their productivity with Orbit.
+          </p>
+          <a
+            href="/api/auth/signin"
+            className="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-2xl"
+          >
+            Sign Up Now
+          </a>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-white/10 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-white/50">© 2024 Orbit Dashboard. All rights reserved.</p>
         </div>
       </div>
     </div>
