@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'schedule'
     const year = searchParams.get('year') || new Date().getFullYear().toString()
 
-    // Fetch data from Ergast API
-    const ergastBaseUrl = 'http://ergast.com/api/f1'
+    // Fetch data from Ergast API (new URL)
+    const ergastBaseUrl = 'https://api.jolpi.ca/ergast/f1'
     
     let apiUrl = ''
     switch (type) {
@@ -140,13 +140,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching F1 data:', error)
     
-    // Return fallback mock data on error
-    const fallbackData = getFallbackF1Data()
     return NextResponse.json({
-      ...fallbackData,
-      status: 'error',
-      message: 'Failed to fetch F1 data, showing fallback data'
-    })
+      error: 'Failed to fetch F1 data',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      status: 'error'
+    }, { status: 500 })
   }
 }
 
@@ -164,76 +162,3 @@ function getRaceStatus(date: string, time: string): 'upcoming' | 'live' | 'compl
   }
 }
 
-// Fallback data when API fails
-function getFallbackF1Data() {
-  return {
-    races: [
-      {
-        id: '1',
-        name: 'Bahrain Grand Prix',
-        circuit: 'Bahrain International Circuit',
-        location: 'Sakhir',
-        country: 'Bahrain',
-        date: '2024-03-02',
-        time: '15:00:00Z',
-        url: 'https://www.formula1.com/en/racing/2024/Bahrain.html',
-        status: 'upcoming'
-      },
-      {
-        id: '2',
-        name: 'Saudi Arabian Grand Prix',
-        circuit: 'Jeddah Corniche Circuit',
-        location: 'Jeddah',
-        country: 'Saudi Arabia',
-        date: '2024-03-09',
-        time: '17:00:00Z',
-        url: 'https://www.formula1.com/en/racing/2024/Saudi_Arabia.html',
-        status: 'upcoming'
-      },
-      {
-        id: '3',
-        name: 'Australian Grand Prix',
-        circuit: 'Albert Park Circuit',
-        location: 'Melbourne',
-        country: 'Australia',
-        date: '2024-03-24',
-        time: '05:00:00Z',
-        url: 'https://www.formula1.com/en/racing/2024/Australia.html',
-        status: 'upcoming'
-      }
-    ],
-    standings: [
-      {
-        position: '1',
-        points: '25',
-        wins: '1',
-        driver: {
-          id: 'max_verstappen',
-          name: 'Max Verstappen',
-          nationality: 'Dutch',
-          code: 'VER'
-        },
-        constructor: {
-          name: 'Red Bull Racing',
-          nationality: 'Austrian'
-        }
-      },
-      {
-        position: '2',
-        points: '18',
-        wins: '0',
-        driver: {
-          id: 'sergio_perez',
-          name: 'Sergio Perez',
-          nationality: 'Mexican',
-          code: 'PER'
-        },
-        constructor: {
-          name: 'Red Bull Racing',
-          nationality: 'Austrian'
-        }
-      }
-    ],
-    season: '2024'
-  }
-}

@@ -60,6 +60,9 @@ export default function F1Widget() {
       if (standingsResponse.ok) {
         const standingsData = await standingsResponse.json()
         setDrivers(standingsData.standings || [])
+      } else {
+        const errorData = await standingsResponse.json()
+        throw new Error(errorData.message || 'Failed to fetch standings')
       }
 
       // Fetch race schedule
@@ -67,6 +70,9 @@ export default function F1Widget() {
       if (racesResponse.ok) {
         const racesData = await racesResponse.json()
         setRaces(racesData.races || [])
+      } else {
+        const errorData = await racesResponse.json()
+        throw new Error(errorData.message || 'Failed to fetch race schedule')
       }
 
       // Fetch next race
@@ -74,10 +80,14 @@ export default function F1Widget() {
       if (nextRaceResponse.ok) {
         const nextRaceData = await nextRaceResponse.json()
         setNextRace(nextRaceData)
+      } else {
+        const errorData = await nextRaceResponse.json()
+        throw new Error(errorData.message || 'Failed to fetch next race')
       }
 
     } catch (err) {
-      setError('Failed to load F1 data')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load F1 data'
+      setError(errorMessage)
       console.error('Error fetching F1 data:', err)
     } finally {
       setLoading(false)
