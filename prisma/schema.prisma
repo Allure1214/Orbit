@@ -122,10 +122,14 @@ model Expense {
 
 model UserPreferences {
   id              String  @id @default(cuid())
-  theme           String  @default("light")
+  theme           String  @default("dark")
   dashboardLayout Json?
   weatherLocation String?
   newsCategories  String[]
+  
+  // Financial preferences
+  monthlyBudget   Float?  @default(2000.0)
+  currency        String  @default("USD")
   
   // Relations
   userId          String  @unique

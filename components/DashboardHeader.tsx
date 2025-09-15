@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function DashboardHeader() {
   const { data: session } = useSession()
@@ -64,9 +65,13 @@ export default function DashboardHeader() {
                   <button className="w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors">
                     Profile Settings
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                  <Link
+                    href="/preferences"
+                    className="block w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
                     Preferences
-                  </button>
+                  </Link>
                   <button
                     onClick={() => signOut()}
                     className="w-full px-4 py-2 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"

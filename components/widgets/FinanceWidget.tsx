@@ -30,9 +30,28 @@ export default function FinanceWidget() {
     { value: 'OTHER', label: 'Other' }
   ]
 
+  const [monthlyBudget, setMonthlyBudget] = useState(2000)
+  const [currency, setCurrency] = useState('USD')
+  
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-  const monthlyBudget = 2000
   const remainingBudget = monthlyBudget - totalExpenses
+
+  // Fetch user preferences for budget
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await fetch('/api/preferences')
+        if (response.ok) {
+          const prefs = await response.json()
+          setMonthlyBudget(prefs.monthlyBudget || 2000)
+          setCurrency(prefs.currency || 'USD')
+        }
+      } catch (err) {
+        console.error('Error fetching preferences:', err)
+      }
+    }
+    fetchPreferences()
+  }, [])
 
   // Fetch expenses from API
   const fetchExpenses = async () => {
@@ -74,6 +93,20 @@ export default function FinanceWidget() {
   const getCategoryLabel = (category: string) => {
     const categoryObj = categories.find(cat => cat.value === category)
     return categoryObj ? categoryObj.label : category
+  }
+
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: { [key: string]: string } = {
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'MYR': 'RM',
+      'SGD': 'S$',
+      'JPY': '¥',
+      'AUD': 'A$',
+      'CAD': 'C$'
+    }
+    return symbols[currency] || '$'
   }
 
   const addExpense = async () => {
@@ -176,12 +209,12 @@ export default function FinanceWidget() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white/5 rounded-lg p-4">
           <div className="text-white/70 text-sm mb-1">Total Spent</div>
-          <div className="text-2xl font-bold text-white">${totalExpenses.toFixed(2)}</div>
+          <div className="text-2xl font-bold text-white">{getCurrencySymbol(currency)}{totalExpenses.toFixed(2)}</div>
         </div>
         <div className="bg-white/5 rounded-lg p-4">
           <div className="text-white/70 text-sm mb-1">Remaining</div>
           <div className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            ${remainingBudget.toFixed(2)}
+            {getCurrencySymbol(currency)}{remainingBudget.toFixed(2)}
           </div>
         </div>
       </div>
@@ -262,7 +295,7 @@ export default function FinanceWidget() {
                 <div className={`w-3 h-3 rounded-full ${getCategoryColor(cat.category)}`}></div>
                 <span className="text-white text-sm">{cat.label}</span>
               </div>
-              <span className="text-white font-medium">${cat.total.toFixed(2)}</span>
+              <span className="text-white font-medium">{getCurrencySymbol(currency)}{cat.total.toFixed(2)}</span>
             </div>
           ))}
         </div>
@@ -282,7 +315,7 @@ export default function FinanceWidget() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-white font-medium">${expense.amount.toFixed(2)}</span>
+                <span className="text-white font-medium">{getCurrencySymbol(currency)}{expense.amount.toFixed(2)}</span>
                 <button
                   onClick={() => deleteExpense(expense.id)}
                   className="p-1 text-white/50 hover:text-red-400 transition-colors"
