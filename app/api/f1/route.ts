@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'schedule'
     const year = searchParams.get('year') || new Date().getFullYear().toString()
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
 
     // Fetch data from Ergast API (new URL)
     const ergastBaseUrl = 'https://api.jolpi.ca/ergast/f1'
@@ -53,19 +55,37 @@ export async function GET(request: NextRequest) {
     
     switch (type) {
       case 'schedule':
+        const allRaces = data.MRData.RaceTable?.Races?.map((race: any) => ({
+          id: race.round,
+          name: race.raceName,
+          circuit: race.Circuit?.circuitName || 'Unknown Circuit',
+          location: race.Circuit?.Location?.locality || 'Unknown',
+          country: race.Circuit?.Location?.country || 'Unknown',
+          date: race.date,
+          time: race.time,
+          url: race.url,
+          status: getRaceStatus(race.date, race.time)
+        })) || []
+
+        // Filter out completed races, only show upcoming and live races
+        const upcomingRaces = allRaces.filter(race => race.status !== 'completed')
+        
+        // Apply pagination
+        const startIndex = (page - 1) * limit
+        const endIndex = startIndex + limit
+        const paginatedRaces = upcomingRaces.slice(startIndex, endIndex)
+
         transformedData = {
-          races: data.MRData.RaceTable?.Races?.map((race: any) => ({
-            id: race.round,
-            name: race.raceName,
-            circuit: race.Circuit?.circuitName || 'Unknown Circuit',
-            location: race.Circuit?.Location?.locality || 'Unknown',
-            country: race.Circuit?.Location?.country || 'Unknown',
-            date: race.date,
-            time: race.time,
-            url: race.url,
-            status: getRaceStatus(race.date, race.time)
-          })) || [],
-          season: data.MRData.RaceTable?.season || year
+          races: paginatedRaces,
+          season: data.MRData.RaceTable?.season || year,
+          pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(upcomingRaces.length / limit),
+            totalRaces: upcomingRaces.length,
+            limit: limit,
+            hasNextPage: endIndex < upcomingRaces.length,
+            hasPrevPage: page > 1
+          }
         }
         break
         

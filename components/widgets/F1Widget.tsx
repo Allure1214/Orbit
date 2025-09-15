@@ -48,6 +48,18 @@ export default function F1Widget() {
     minutes: number
     seconds: number
   } | null>(null)
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [pagination, setPagination] = useState<{
+    currentPage: number
+    totalPages: number
+    totalRaces: number
+    limit: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  } | null>(null)
 
   // Fetch F1 data from API
   const fetchF1Data = async () => {
@@ -65,11 +77,12 @@ export default function F1Widget() {
         throw new Error(errorData.message || 'Failed to fetch standings')
       }
 
-      // Fetch race schedule
-      const racesResponse = await fetch('/api/f1?type=schedule')
+      // Fetch race schedule with pagination
+      const racesResponse = await fetch(`/api/f1?type=schedule&page=${currentPage}&limit=${pageSize}`)
       if (racesResponse.ok) {
         const racesData = await racesResponse.json()
         setRaces(racesData.races || [])
+        setPagination(racesData.pagination || null)
       } else {
         const errorData = await racesResponse.json()
         throw new Error(errorData.message || 'Failed to fetch race schedule')
@@ -176,6 +189,46 @@ export default function F1Widget() {
   const refreshData = () => {
     fetchF1Data()
   }
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
+
+  // Fetch races when page or page size changes
+  const fetchRaces = async (page: number, limit: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const racesResponse = await fetch(`/api/f1?type=schedule&page=${page}&limit=${limit}`)
+      if (racesResponse.ok) {
+        const racesData = await racesResponse.json()
+        setRaces(racesData.races || [])
+        setPagination(racesData.pagination || null)
+      } else {
+        const errorData = await racesResponse.json()
+        throw new Error(errorData.message || 'Failed to fetch race schedule')
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load races'
+      setError(errorMessage)
+      console.error('Error fetching races:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load races when page or page size changes
+  useEffect(() => {
+    if (activeTab === 'races') {
+      fetchRaces(currentPage, pageSize)
+    }
+  }, [currentPage, pageSize, activeTab])
 
   if (loading) {
     return (
@@ -346,7 +399,22 @@ export default function F1Widget() {
         </div>
       ) : (
         <div className="space-y-3">
-          <h4 className="text-white/70 text-sm font-medium mb-3">Race Schedule</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-white/70 text-sm font-medium">Upcoming Races</h4>
+            <div className="flex items-center space-x-2">
+              <span className="text-white/50 text-xs">Per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
+                className="bg-white/10 text-white border border-white/20 rounded px-2 py-1 text-xs"
+              >
+                <option value={5} className="bg-gray-800">5</option>
+                <option value={10} className="bg-gray-800">10</option>
+                <option value={15} className="bg-gray-800">15</option>
+              </select>
+            </div>
+          </div>
+          
           {races.map((race, index) => (
             <div key={index} className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
               <div className="flex items-center justify-between mb-2">
@@ -363,6 +431,34 @@ export default function F1Widget() {
               </div>
             </div>
           ))}
+
+          {/* Pagination Controls */}
+          {pagination && pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <div className="text-white/50 text-xs">
+                Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to {Math.min(pagination.currentPage * pagination.limit, pagination.totalRaces)} of {pagination.totalRaces} races
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                  className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-white/70 text-xs">
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
