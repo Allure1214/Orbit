@@ -131,9 +131,8 @@ export default function F1Widget() {
       setCountdown(null)
       return
     }
-
     const updateCountdown = () => {
-      const raceDateTime = new Date(`${nextRace.race.date}T${nextRace.race.time}`)
+      const raceDateTime = new Date(`${nextRace?.race?.date}T${nextRace?.race?.time}`)
       const now = new Date()
       const diff = raceDateTime.getTime() - now.getTime()
 

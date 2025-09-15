@@ -66,9 +66,8 @@ export async function GET(request: NextRequest) {
           url: race.url,
           status: getRaceStatus(race.date, race.time)
         })) || []
-
         // Filter out completed races, only show upcoming and live races
-        const upcomingRaces = allRaces.filter(race => race.status !== 'completed')
+        const upcomingRaces = allRaces.filter((race: { status: string }) => race.status !== 'completed')
         
         // Apply pagination
         const startIndex = (page - 1) * limit
