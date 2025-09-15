@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Note {
   id: string
@@ -12,57 +12,101 @@ interface Note {
 }
 
 export default function NotesWidget() {
-  const [notes, setNotes] = useState<Note[]>([
-    {
-      id: '1',
-      title: 'Project Ideas',
-      content: 'Brainstorming new features for the dashboard. Consider adding dark mode toggle and customizable widgets.',
-      tags: ['work', 'ideas'],
-      createdAt: '2024-01-12T10:00:00Z',
-      updatedAt: '2024-01-12T10:00:00Z'
-    },
-    {
-      id: '2',
-      title: 'Meeting Notes',
-      content: 'Team standup: Discussed quarterly goals, budget allocation, and upcoming deadlines.',
-      tags: ['meeting', 'work'],
-      createdAt: '2024-01-11T14:30:00Z',
-      updatedAt: '2024-01-11T14:30:00Z'
-    },
-    {
-      id: '3',
-      title: 'Personal Goals',
-      content: 'Learn TypeScript, read 2 books this month, exercise 3 times a week.',
-      tags: ['personal', 'goals'],
-      createdAt: '2024-01-10T09:15:00Z',
-      updatedAt: '2024-01-10T09:15:00Z'
-    }
-  ])
-
+  const [notes, setNotes] = useState<Note[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: '' })
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [allTags, setAllTags] = useState<string[]>([])
 
-  const addNote = () => {
-    if (newNote.title.trim() && newNote.content.trim()) {
-      const note: Note = {
-        id: Date.now().toString(),
-        title: newNote.title,
-        content: newNote.content,
-        tags: newNote.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+  // Fetch notes from API
+  const fetchNotes = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const params = new URLSearchParams()
+      if (searchQuery) params.append('search', searchQuery)
+      if (selectedTag) params.append('tag', selectedTag)
+      
+      const response = await fetch(`/api/notes?${params.toString()}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch notes')
       }
-      setNotes([note, ...notes])
-      setNewNote({ title: '', content: '', tags: '' })
-      setShowAddForm(false)
+      
+      const data = await response.json() as Note[]
+      setNotes(data)
+      
+      // Extract unique tags from all notes
+      const tags = Array.from(new Set(data.flatMap((note: Note) => note.tags)))
+      setAllTags(tags)
+    } catch (err) {
+      setError('Failed to load notes')
+      console.error('Error fetching notes:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const deleteNote = (id: string) => {
-    setNotes(notes.filter(note => note.id !== id))
-    if (selectedNote?.id === id) {
-      setSelectedNote(null)
+  // Load notes on component mount and when search/filter changes
+  useEffect(() => {
+    fetchNotes()
+  }, [searchQuery, selectedTag])
+
+  const addNote = async () => {
+    if (!newNote.title.trim() || !newNote.content.trim()) return
+
+    try {
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newNote.title,
+          content: newNote.content,
+          tags: newNote.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create note')
+      }
+
+      const note = await response.json()
+      setNotes([note, ...notes])
+      setNewNote({ title: '', content: '', tags: '' })
+      setShowAddForm(false)
+      
+      // Refresh tags
+      const tags = Array.from(new Set([...allTags, ...note.tags]))
+      setAllTags(tags)
+    } catch (err) {
+      setError('Failed to create note')
+      console.error('Error creating note:', err)
+    }
+  }
+
+  const deleteNote = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete note')
+      }
+
+      setNotes(notes.filter(note => note.id !== id))
+      if (selectedNote?.id === id) {
+        setSelectedNote(null)
+      }
+    } catch (err) {
+      setError('Failed to delete note')
+      console.error('Error deleting note:', err)
     }
   }
 
@@ -88,6 +132,24 @@ export default function NotesWidget() {
     return colors[index]
   }
 
+  if (loading) {
+    return (
+      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-white mb-1">Notes</h3>
+            <p className="text-white/70 text-sm">Loading notes...</p>
+          </div>
+        </div>
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-20 bg-white/10 rounded-lg"></div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
@@ -103,6 +165,57 @@ export default function NotesWidget() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </button>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 text-sm">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-400 hover:text-red-300 text-xs mt-1"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Search and Filter */}
+      <div className="mb-4 space-y-2">
+        <input
+          type="text"
+          placeholder="Search notes..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-white/10 text-white placeholder-white/50 border border-white/20 rounded px-3 py-2 text-sm"
+        />
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setSelectedTag('')}
+              className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                selectedTag === '' 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-white/5 text-white/70 hover:bg-white/10'
+              }`}
+            >
+              All
+            </button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
+                className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                  selectedTag === tag 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Add Note Form */}
@@ -243,3 +356,4 @@ export default function NotesWidget() {
     </div>
   )
 }
+
