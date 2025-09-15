@@ -1,68 +1,159 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Expense {
   id: string
   amount: number
   description: string
-  category: string
+  category: 'FOOD' | 'TRANSPORTATION' | 'ENTERTAINMENT' | 'SHOPPING' | 'BILLS' | 'HEALTHCARE' | 'EDUCATION' | 'OTHER'
   date: string
+  createdAt: string
+  updatedAt: string
 }
 
 export default function FinanceWidget() {
-  const [expenses, setExpenses] = useState<Expense[]>([
-    { id: '1', amount: 45.50, description: 'Lunch', category: 'Food', date: '2024-01-12' },
-    { id: '2', amount: 120.00, description: 'Transportation', category: 'Transport', date: '2024-01-11' },
-    { id: '3', amount: 89.99, description: 'Entertainment', category: 'Entertainment', date: '2024-01-10' },
-    { id: '4', amount: 200.00, description: 'Groceries', category: 'Food', date: '2024-01-09' },
-    { id: '5', amount: 75.00, description: 'Utilities', category: 'Bills', date: '2024-01-08' },
-  ])
-
-  const [newExpense, setNewExpense] = useState({ amount: '', description: '', category: 'Food' })
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [newExpense, setNewExpense] = useState({ amount: '', description: '', category: 'FOOD' as const, date: '' })
   const [showAddForm, setShowAddForm] = useState(false)
 
-  const categories = ['Food', 'Transport', 'Entertainment', 'Bills', 'Shopping', 'Other']
+  const categories = [
+    { value: 'FOOD', label: 'Food' },
+    { value: 'TRANSPORTATION', label: 'Transport' },
+    { value: 'ENTERTAINMENT', label: 'Entertainment' },
+    { value: 'SHOPPING', label: 'Shopping' },
+    { value: 'BILLS', label: 'Bills' },
+    { value: 'HEALTHCARE', label: 'Healthcare' },
+    { value: 'EDUCATION', label: 'Education' },
+    { value: 'OTHER', label: 'Other' }
+  ]
+
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
   const monthlyBudget = 2000
   const remainingBudget = monthlyBudget - totalExpenses
 
+  // Fetch expenses from API
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/expenses')
+      if (!response.ok) {
+        throw new Error('Failed to fetch expenses')
+      }
+      const data = await response.json()
+      setExpenses(data)
+    } catch (err) {
+      setError('Failed to load expenses')
+      console.error('Error fetching expenses:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load expenses on component mount
+  useEffect(() => {
+    fetchExpenses()
+  }, [])
+
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
-      'Food': 'bg-red-500',
-      'Transport': 'bg-blue-500',
-      'Entertainment': 'bg-purple-500',
-      'Bills': 'bg-yellow-500',
-      'Shopping': 'bg-green-500',
-      'Other': 'bg-gray-500'
+      'FOOD': 'bg-red-500',
+      'TRANSPORTATION': 'bg-blue-500',
+      'ENTERTAINMENT': 'bg-purple-500',
+      'SHOPPING': 'bg-green-500',
+      'BILLS': 'bg-yellow-500',
+      'HEALTHCARE': 'bg-pink-500',
+      'EDUCATION': 'bg-indigo-500',
+      'OTHER': 'bg-gray-500'
     }
     return colors[category] || 'bg-gray-500'
   }
 
-  const addExpense = () => {
-    if (newExpense.amount && newExpense.description) {
-      const expense: Expense = {
-        id: Date.now().toString(),
-        amount: parseFloat(newExpense.amount),
-        description: newExpense.description,
-        category: newExpense.category,
-        date: new Date().toISOString().split('T')[0]
+  const getCategoryLabel = (category: string) => {
+    const categoryObj = categories.find(cat => cat.value === category)
+    return categoryObj ? categoryObj.label : category
+  }
+
+  const addExpense = async () => {
+    if (!newExpense.amount || !newExpense.description) return
+
+    try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: newExpense.amount,
+          description: newExpense.description,
+          category: newExpense.category,
+          date: newExpense.date || new Date().toISOString().split('T')[0],
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create expense')
       }
+
+      const expense = await response.json()
       setExpenses([expense, ...expenses])
-      setNewExpense({ amount: '', description: '', category: 'Food' })
+      setNewExpense({ amount: '', description: '', category: 'FOOD', date: '' })
       setShowAddForm(false)
+    } catch (err) {
+      setError('Failed to create expense')
+      console.error('Error creating expense:', err)
     }
   }
 
-  const deleteExpense = (id: string) => {
-    setExpenses(expenses.filter(expense => expense.id !== id))
+  const deleteExpense = async (id: string) => {
+    try {
+      const response = await fetch(`/api/expenses/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense')
+      }
+
+      setExpenses(expenses.filter(expense => expense.id !== id))
+    } catch (err) {
+      setError('Failed to delete expense')
+      console.error('Error deleting expense:', err)
+    }
   }
 
   // Calculate category totals
   const categoryTotals = categories.map(category => ({
-    category,
-    total: expenses.filter(e => e.category === category).reduce((sum, e) => sum + e.amount, 0)
+    category: category.value,
+    label: category.label,
+    total: expenses.filter(e => e.category === category.value).reduce((sum, e) => sum + e.amount, 0)
   })).filter(cat => cat.total > 0)
+
+  if (loading) {
+    return (
+      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-white mb-1">Finance</h3>
+            <p className="text-white/70 text-sm">Loading expenses...</p>
+          </div>
+        </div>
+        <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-20 bg-white/10 rounded-lg"></div>
+            <div className="h-20 bg-white/10 rounded-lg"></div>
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-12 bg-white/10 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
@@ -95,6 +186,19 @@ export default function FinanceWidget() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 text-sm">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-400 hover:text-red-300 text-xs mt-1"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Add Expense Form */}
       {showAddForm && (
         <div className="mb-4 p-4 bg-white/5 rounded-lg">
@@ -105,14 +209,16 @@ export default function FinanceWidget() {
               value={newExpense.amount}
               onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
               className="bg-transparent text-white placeholder-white/50 border border-white/20 rounded px-3 py-2 text-sm"
+              step="0.01"
+              min="0"
             />
             <select
               value={newExpense.category}
-              onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
+              onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value as any })}
               className="bg-white/10 text-white border border-white/20 rounded px-3 py-2 text-sm"
             >
               {categories.map(cat => (
-                <option key={cat} value={cat} className="bg-gray-800">{cat}</option>
+                <option key={cat.value} value={cat.value} className="bg-gray-800">{cat.label}</option>
               ))}
             </select>
           </div>
@@ -122,6 +228,12 @@ export default function FinanceWidget() {
             value={newExpense.description}
             onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
             className="w-full bg-transparent text-white placeholder-white/50 border border-white/20 rounded px-3 py-2 text-sm mb-3"
+          />
+          <input
+            type="date"
+            value={newExpense.date}
+            onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
+            className="w-full bg-transparent text-white border border-white/20 rounded px-3 py-2 text-sm mb-3"
           />
           <div className="flex justify-end space-x-2">
             <button
@@ -134,7 +246,7 @@ export default function FinanceWidget() {
               onClick={addExpense}
               className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
             >
-              Add
+              Add Expense
             </button>
           </div>
         </div>
@@ -148,7 +260,7 @@ export default function FinanceWidget() {
             <div key={cat.category} className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className={`w-3 h-3 rounded-full ${getCategoryColor(cat.category)}`}></div>
-                <span className="text-white text-sm">{cat.category}</span>
+                <span className="text-white text-sm">{cat.label}</span>
               </div>
               <span className="text-white font-medium">${cat.total.toFixed(2)}</span>
             </div>
@@ -166,7 +278,7 @@ export default function FinanceWidget() {
                 <div className={`w-2 h-2 rounded-full ${getCategoryColor(expense.category)}`}></div>
                 <div>
                   <div className="text-white text-sm">{expense.description}</div>
-                  <div className="text-white/50 text-xs">{expense.category}</div>
+                  <div className="text-white/50 text-xs">{getCategoryLabel(expense.category)}</div>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -187,3 +299,4 @@ export default function FinanceWidget() {
     </div>
   )
 }
+
