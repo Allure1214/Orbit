@@ -46,13 +46,33 @@ export default function NewsWidget() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch(`/api/news?category=${category}&pageSize=10`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch news')
+      // For 'all' category, fetch from multiple categories and combine
+      if (category === 'all') {
+        const categoriesToFetch = ['technology', 'business', 'sports', 'health', 'science']
+        const promises = categoriesToFetch.map(cat => 
+          fetch(`/api/news?category=${cat}&pageSize=3`)
+            .then(res => res.ok ? res.json() : { articles: [] })
+            .catch(() => ({ articles: [] }))
+        )
+        
+        const results = await Promise.all(promises)
+        const allArticles = results.flatMap(result => result.articles || [])
+        
+        // Sort by published date and limit to 10
+        const sortedArticles = allArticles
+          .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+          .slice(0, 10)
+        
+        setNews(sortedArticles)
+      } else {
+        const response = await fetch(`/api/news?category=${category}&pageSize=10`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch news')
+        }
+        
+        const data = await response.json()
+        setNews(data.articles || [])
       }
-      
-      const data = await response.json()
-      setNews(data.articles || [])
     } catch (err) {
       setError('Failed to load news')
       console.error('Error fetching news:', err)
@@ -66,9 +86,8 @@ export default function NewsWidget() {
     fetchNews(selectedCategory)
   }, [selectedCategory])
 
-  const filteredNews = selectedCategory === 'all' 
-    ? news 
-    : news.filter(item => item.category === selectedCategory)
+  // No need for filtering since we fetch the right data for each category
+  const filteredNews = news
 
   const refreshNews = () => {
     fetchNews(selectedCategory)

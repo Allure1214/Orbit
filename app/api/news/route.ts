@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
     const pageSize = searchParams.get('pageSize') || '10'
     const country = searchParams.get('country') || 'us'
 
+    // Handle 'all' category by defaulting to 'general'
+    const apiCategory = category === 'all' ? 'general' : category
+
     // Check if NewsAPI key is available
     const newsApiKey = process.env.NEWS_API_KEY
     
@@ -74,17 +77,20 @@ export async function GET(request: NextRequest) {
         }
       ]
 
+      // For 'all' category, return all mock news
+      const filteredMockNews = category === 'all' 
+        ? mockNews 
+        : mockNews.filter(article => article.category === category)
+
       return NextResponse.json({
-        articles: mockNews.filter(article => 
-          category === 'all' || article.category === category
-        ),
-        totalResults: mockNews.length,
+        articles: filteredMockNews,
+        totalResults: filteredMockNews.length,
         status: 'ok'
       })
     }
 
     // Fetch real news from NewsAPI
-    const apiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&pageSize=${pageSize}&apiKey=${newsApiKey}`
+    const apiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&category=${apiCategory}&pageSize=${pageSize}&apiKey=${newsApiKey}`
     
     const response = await fetch(apiUrl)
     
@@ -109,7 +115,7 @@ export async function GET(request: NextRequest) {
       source: {
         name: article.source?.name || 'Unknown Source'
       },
-      category: category
+      category: category === 'all' ? 'general' : category
     }))
 
     return NextResponse.json({
