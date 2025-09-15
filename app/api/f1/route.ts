@@ -107,9 +107,9 @@ export async function GET(request: NextRequest) {
         })) || []
 
         // Apply pagination to standings
-        const startIndex = (page - 1) * limit
-        const endIndex = startIndex + limit
-        const paginatedStandings = allStandings.slice(startIndex, endIndex)
+        const standingsStartIndex = (page - 1) * limit
+        const standingsEndIndex = standingsStartIndex + limit
+        const paginatedStandings = allStandings.slice(standingsStartIndex, standingsEndIndex)
 
         transformedData = {
           standings: paginatedStandings,
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
             totalPages: Math.ceil(allStandings.length / limit),
             totalDrivers: allStandings.length,
             limit: limit,
-            hasNextPage: endIndex < allStandings.length,
+            hasNextPage: standingsEndIndex < allStandings.length,
             hasPrevPage: page > 1
           }
         }
