@@ -51,11 +51,23 @@ export default function F1Widget() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [pagination, setPagination] = useState<{
+  const [pageSize, setPageSize] = useState(5)
+  const [racesPagination, setRacesPagination] = useState<{
     currentPage: number
     totalPages: number
     totalRaces: number
+    limit: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  } | null>(null)
+  
+  // Standings pagination state
+  const [standingsCurrentPage, setStandingsCurrentPage] = useState(1)
+  const [standingsPageSize, setStandingsPageSize] = useState(5)
+  const [standingsPagination, setStandingsPagination] = useState<{
+    currentPage: number
+    totalPages: number
+    totalDrivers: number
     limit: number
     hasNextPage: boolean
     hasPrevPage: boolean
@@ -67,11 +79,12 @@ export default function F1Widget() {
       setLoading(true)
       setError(null)
 
-      // Fetch standings
-      const standingsResponse = await fetch('/api/f1?type=standings')
+      // Fetch standings with pagination
+      const standingsResponse = await fetch(`/api/f1?type=standings&page=${standingsCurrentPage}&limit=${standingsPageSize}`)
       if (standingsResponse.ok) {
         const standingsData = await standingsResponse.json()
         setDrivers(standingsData.standings || [])
+        setStandingsPagination(standingsData.pagination || null)
       } else {
         const errorData = await standingsResponse.json()
         throw new Error(errorData.message || 'Failed to fetch standings')
@@ -82,7 +95,7 @@ export default function F1Widget() {
       if (racesResponse.ok) {
         const racesData = await racesResponse.json()
         setRaces(racesData.races || [])
-        setPagination(racesData.pagination || null)
+        setRacesPagination(racesData.pagination || null)
       } else {
         const errorData = await racesResponse.json()
         throw new Error(errorData.message || 'Failed to fetch race schedule')
@@ -199,6 +212,15 @@ export default function F1Widget() {
     setCurrentPage(1) // Reset to first page when changing page size
   }
 
+  const handleStandingsPageChange = (newPage: number) => {
+    setStandingsCurrentPage(newPage)
+  }
+
+  const handleStandingsPageSizeChange = (newSize: number) => {
+    setStandingsPageSize(newSize)
+    setStandingsCurrentPage(1) // Reset to first page when changing page size
+  }
+
   // Fetch races when page or page size changes
   const fetchRaces = async (page: number, limit: number) => {
     try {
@@ -209,7 +231,7 @@ export default function F1Widget() {
       if (racesResponse.ok) {
         const racesData = await racesResponse.json()
         setRaces(racesData.races || [])
-        setPagination(racesData.pagination || null)
+        setRacesPagination(racesData.pagination || null)
       } else {
         const errorData = await racesResponse.json()
         throw new Error(errorData.message || 'Failed to fetch race schedule')
@@ -223,12 +245,43 @@ export default function F1Widget() {
     }
   }
 
+  // Fetch standings when page or page size changes
+  const fetchStandings = async (page: number, limit: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const standingsResponse = await fetch(`/api/f1?type=standings&page=${page}&limit=${limit}`)
+      if (standingsResponse.ok) {
+        const standingsData = await standingsResponse.json()
+        setDrivers(standingsData.standings || [])
+        setStandingsPagination(standingsData.pagination || null)
+      } else {
+        const errorData = await standingsResponse.json()
+        throw new Error(errorData.message || 'Failed to fetch standings')
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load standings'
+      setError(errorMessage)
+      console.error('Error fetching standings:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Load races when page or page size changes
   useEffect(() => {
     if (activeTab === 'races') {
       fetchRaces(currentPage, pageSize)
     }
   }, [currentPage, pageSize, activeTab])
+
+  // Load standings when page or page size changes
+  useEffect(() => {
+    if (activeTab === 'standings') {
+      fetchStandings(standingsCurrentPage, standingsPageSize)
+    }
+  }, [standingsCurrentPage, standingsPageSize, activeTab])
 
   if (loading) {
     return (
@@ -376,7 +429,22 @@ export default function F1Widget() {
         </div>
       ) : activeTab === 'standings' ? (
         <div className="space-y-3">
-          <h4 className="text-white/70 text-sm font-medium mb-3">Driver Standings</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-white/70 text-sm font-medium">Driver Standings</h4>
+            <div className="flex items-center space-x-2">
+              <span className="text-white/50 text-xs">Per page:</span>
+              <select
+                value={standingsPageSize}
+                onChange={(e) => handleStandingsPageSizeChange(parseInt(e.target.value))}
+                className="bg-white/10 text-white border border-white/20 rounded px-2 py-1 text-xs"
+              >
+                <option value={5} className="bg-gray-800">5</option>
+                <option value={10} className="bg-gray-800">10</option>
+                <option value={15} className="bg-gray-800">15</option>
+              </select>
+            </div>
+          </div>
+          
           {drivers.map((driver, index) => (
             <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
               <div className="flex items-center space-x-3">
@@ -396,6 +464,34 @@ export default function F1Widget() {
               </div>
             </div>
           ))}
+
+          {/* Standings Pagination Controls */}
+          {standingsPagination && standingsPagination.totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <div className="text-white/50 text-xs">
+                Showing {((standingsPagination.currentPage - 1) * standingsPagination.limit) + 1} to {Math.min(standingsPagination.currentPage * standingsPagination.limit, standingsPagination.totalDrivers)} of {standingsPagination.totalDrivers} drivers
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleStandingsPageChange(standingsCurrentPage - 1)}
+                  disabled={!standingsPagination.hasPrevPage}
+                  className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-white/70 text-xs">
+                  Page {standingsPagination.currentPage} of {standingsPagination.totalPages}
+                </span>
+                <button
+                  onClick={() => handleStandingsPageChange(standingsCurrentPage + 1)}
+                  disabled={!standingsPagination.hasNextPage}
+                  className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
@@ -433,25 +529,25 @@ export default function F1Widget() {
           ))}
 
           {/* Pagination Controls */}
-          {pagination && pagination.totalPages > 1 && (
+          {racesPagination && racesPagination.totalPages > 1 && (
             <div className="flex items-center justify-between pt-4 border-t border-white/10">
               <div className="text-white/50 text-xs">
-                Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to {Math.min(pagination.currentPage * pagination.limit, pagination.totalRaces)} of {pagination.totalRaces} races
+                Showing {((racesPagination.currentPage - 1) * racesPagination.limit) + 1} to {Math.min(racesPagination.currentPage * racesPagination.limit, racesPagination.totalRaces)} of {racesPagination.totalRaces} races
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={!pagination.hasPrevPage}
+                  disabled={!racesPagination.hasPrevPage}
                   className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                 >
                   Previous
                 </button>
                 <span className="text-white/70 text-xs">
-                  Page {pagination.currentPage} of {pagination.totalPages}
+                  Page {racesPagination.currentPage} of {racesPagination.totalPages}
                 </span>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={!pagination.hasNextPage}
+                  disabled={!racesPagination.hasNextPage}
                   className="px-3 py-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                 >
                   Next

@@ -90,23 +90,38 @@ export async function GET(request: NextRequest) {
         break
         
       case 'standings':
+        const allStandings = data.MRData.StandingsTable?.StandingsLists?.[0]?.DriverStandings?.map((driver: any) => ({
+          position: driver.position,
+          points: driver.points,
+          wins: driver.wins,
+          driver: {
+            id: driver.Driver.driverId,
+            name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
+            nationality: driver.Driver.nationality,
+            code: driver.Driver.code
+          },
+          constructor: {
+            name: driver.Constructors?.[0]?.name || 'Unknown',
+            nationality: driver.Constructors?.[0]?.nationality || 'Unknown'
+          }
+        })) || []
+
+        // Apply pagination to standings
+        const startIndex = (page - 1) * limit
+        const endIndex = startIndex + limit
+        const paginatedStandings = allStandings.slice(startIndex, endIndex)
+
         transformedData = {
-          standings: data.MRData.StandingsTable?.StandingsLists?.[0]?.DriverStandings?.map((driver: any) => ({
-            position: driver.position,
-            points: driver.points,
-            wins: driver.wins,
-            driver: {
-              id: driver.Driver.driverId,
-              name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
-              nationality: driver.Driver.nationality,
-              code: driver.Driver.code
-            },
-            constructor: {
-              name: driver.Constructors?.[0]?.name || 'Unknown',
-              nationality: driver.Constructors?.[0]?.nationality || 'Unknown'
-            }
-          })) || [],
-          season: data.MRData.StandingsTable?.season || year
+          standings: paginatedStandings,
+          season: data.MRData.StandingsTable?.season || year,
+          pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(allStandings.length / limit),
+            totalDrivers: allStandings.length,
+            limit: limit,
+            hasNextPage: endIndex < allStandings.length,
+            hasPrevPage: page > 1
+          }
         }
         break
         
