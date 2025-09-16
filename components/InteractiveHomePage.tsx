@@ -17,9 +17,18 @@ export default function InteractiveHomePage() {
               <span className="text-sm font-medium text-white/90">✨ Now Available</span>
             </div>
             
-            <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 tracking-tight">
-              Orbit
-            </h1>
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 mr-6">
+                <img 
+                  src="/logo.png" 
+                  alt="Orbit Logo" 
+                  className="w-16 h-16 object-contain"
+                />
+              </div>
+              <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tight">
+                Orbit
+              </h1>
+            </div>
             
             <p className="text-xl md:text-2xl text-white/80 mb-4 max-w-3xl mx-auto leading-relaxed">
               Your Smart Personal Dashboard

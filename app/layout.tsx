@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: 'A modern, AI-powered personal dashboard for productivity, insights, and personal management.',
   keywords: ['dashboard', 'productivity', 'AI', 'personal', 'management', 'F1', 'weather', 'finance'],
   authors: [{ name: 'Orbit Team' }],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/logo.png',
+  },
 }
 
 export const viewport = {
