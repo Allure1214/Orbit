@@ -62,9 +62,13 @@ export default function DashboardHeader() {
                     <p className="text-white font-medium">{session?.user?.name}</p>
                     <p className="text-white/70 text-sm">{session?.user?.email}</p>
                   </div>
-                  <button className="w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                  <Link
+                    href="/profile"
+                    className="block w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
                     Profile Settings
-                  </button>
+                  </Link>
                   <Link
                     href="/preferences"
                     className="block w-full px-4 py-2 text-left text-white/70 hover:text-white hover:bg-white/10 transition-colors"
