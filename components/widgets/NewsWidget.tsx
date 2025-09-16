@@ -46,9 +46,12 @@ export default function NewsWidget() {
       setLoading(true)
       setError(null)
       
-      // For 'all' category, fetch from multiple categories and combine
+      // For 'all' category, use user preferences or fallback to default categories
       if (category === 'all') {
-        const categoriesToFetch = ['technology', 'business', 'sports', 'health', 'science']
+        const categoriesToFetch = userPreferences.length > 0 
+          ? userPreferences 
+          : ['technology', 'business', 'sports', 'health', 'science']
+        
         const promises = categoriesToFetch.map(cat => 
           fetch(`/api/news?category=${cat}&pageSize=3`)
             .then(res => res.ok ? res.json() : { articles: [] })
@@ -89,6 +92,13 @@ export default function NewsWidget() {
   useEffect(() => {
     fetchNews(selectedCategory)
   }, [selectedCategory])
+
+  // Refetch news when user preferences change (for 'all' category)
+  useEffect(() => {
+    if (selectedCategory === 'all' && userPreferences.length > 0) {
+      fetchNews(selectedCategory)
+    }
+  }, [userPreferences])
 
   // No need for filtering since we fetch the right data for each category
   const filteredNews = news
@@ -183,7 +193,10 @@ export default function NewsWidget() {
                 : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
             }`}
           >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {category === 'all' && userPreferences.length > 0 
+              ? `All (${userPreferences.length} categories)`
+              : category.charAt(0).toUpperCase() + category.slice(1)
+            }
           </button>
         ))}
       </div>
