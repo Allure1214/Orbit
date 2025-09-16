@@ -13,6 +13,14 @@ interface UserPreferences {
   weatherLocation?: string
   newsCategories: string[]
   dashboardLayout?: any
+  enabledWidgets: {
+    tasks: boolean
+    weather: boolean
+    finance: boolean
+    news: boolean
+    f1: boolean
+    notes: boolean
+  }
 }
 
 export default function PreferencesPage() {
@@ -201,27 +209,168 @@ export default function PreferencesPage() {
               </div>
             </div>
 
-            {/* Appearance Settings */}
+            {/* Widget Controls */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="text-2xl mr-3">🎨</span>
-                Appearance
+                <span className="text-2xl mr-3">🎛️</span>
+                Widget Controls
               </h2>
               
               <div className="space-y-6">
-                <div>
-                  <label className="block text-white/70 text-sm font-medium mb-2">
-                    Theme
-                  </label>
-                  <select
-                    value={preferences.theme}
-                    onChange={(e) => updatePreference('theme', e.target.value)}
-                    className="w-full bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2"
-                  >
-                    <option value="dark" className="bg-gray-800">Dark</option>
-                    <option value="light" className="bg-gray-800">Light</option>
-                    <option value="auto" className="bg-gray-800">Auto</option>
-                  </select>
+                <p className="text-white/70 text-sm mb-4">
+                  Enable or disable widgets on your dashboard
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tasks Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-green-400 text-lg">✓</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Tasks</h3>
+                        <p className="text-white/50 text-sm">Manage your daily tasks</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.tasks ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          tasks: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Weather Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-400 text-lg">🌤️</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Weather</h3>
+                        <p className="text-white/50 text-sm">Current weather & forecast</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.weather ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          weather: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Finance Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-green-400 text-lg">💰</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Finance</h3>
+                        <p className="text-white/50 text-sm">Track expenses & budget</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.finance ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          finance: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* News Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-purple-400 text-lg">📰</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">News</h3>
+                        <p className="text-white/50 text-sm">Latest news & updates</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.news ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          news: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* F1 Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-red-400 text-lg">🏎️</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">F1 Racing</h3>
+                        <p className="text-white/50 text-sm">F1 standings & schedule</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.f1 ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          f1: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Notes Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-yellow-400 text-lg">📝</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Notes</h3>
+                        <p className="text-white/50 text-sm">Quick notes & journal</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.notes ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          notes: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

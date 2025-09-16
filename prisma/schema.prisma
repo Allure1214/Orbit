@@ -131,6 +131,9 @@ model UserPreferences {
   monthlyBudget   Float?  @default(2000.0)
   currency        String  @default("USD")
   
+  // Widget preferences
+  enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true}")
+  
   // Relations
   userId          String  @unique
   user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)

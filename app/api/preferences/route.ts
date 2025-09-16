@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { theme, monthlyBudget, currency, weatherLocation, newsCategories, dashboardLayout } = body
+    const { theme, monthlyBudget, currency, weatherLocation, newsCategories, dashboardLayout, enabledWidgets } = body
 
     // Find user
     const user = await prisma.user.findUnique({
@@ -80,7 +80,8 @@ export async function PUT(request: NextRequest) {
         ...(currency && { currency }),
         ...(weatherLocation && { weatherLocation }),
         ...(newsCategories && { newsCategories }),
-        ...(dashboardLayout && { dashboardLayout })
+        ...(dashboardLayout && { dashboardLayout }),
+        ...(enabledWidgets && { enabledWidgets })
       },
       create: {
         userId: user.id,
@@ -89,7 +90,15 @@ export async function PUT(request: NextRequest) {
         currency: currency || 'USD',
         weatherLocation: weatherLocation || null,
         newsCategories: newsCategories || ['technology', 'business', 'health'],
-        dashboardLayout: dashboardLayout || null
+        dashboardLayout: dashboardLayout || null,
+        enabledWidgets: enabledWidgets || {
+          tasks: true,
+          weather: true,
+          finance: true,
+          news: true,
+          f1: true,
+          notes: true
+        } as any
       }
     })
 
