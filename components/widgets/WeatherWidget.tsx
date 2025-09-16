@@ -151,12 +151,12 @@ export default function WeatherWidget() {
             </button>
           </div>
           
-          <div className={`transition-all duration-300 overflow-hidden ${
-            isForecastExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          <div className={`transition-all duration-300 ${
+            isForecastExpanded ? 'max-h-none opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
           }`}>
-            <div className="space-y-2">
+            <div className="space-y-2 pb-2">
               {weather.daily.map((day, index) => (
-                <div key={index} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                <div key={index} className="flex items-center justify-between py-3 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">{day.icon}</span>
                     <div>
@@ -177,9 +177,9 @@ export default function WeatherWidget() {
           
           {/* Show first 3 days when collapsed */}
           {!isForecastExpanded && (
-            <div className="space-y-2">
+            <div className="space-y-2 pb-2">
               {weather.daily.slice(0, 3).map((day, index) => (
-                <div key={index} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                <div key={index} className="flex items-center justify-between py-3 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">{day.icon}</span>
                     <div>
