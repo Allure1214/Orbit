@@ -29,6 +29,7 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function ProfilePage() {
           } else {
             // Fallback to session data
             setProfile({
-              id: session.user.id || '',
+              id: '',
               name: session.user.name || null,
               email: session.user.email || '',
               image: session.user.image || null,
@@ -70,7 +71,7 @@ export default function ProfilePage() {
           console.error('Error fetching profile:', error)
           // Fallback to session data
           setProfile({
-            id: session.user.id || '',
+            id: '',
             name: session.user.name || null,
             email: session.user.email || '',
             image: session.user.image || null,
@@ -140,25 +141,46 @@ export default function ProfilePage() {
     }))
   }
 
-  const handleExportData = async () => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must be less than 5MB')
+      return
+    }
+
     try {
-      const response = await fetch('/api/profile/export')
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `orbit-data-export-${new Date().toISOString().split('T')[0]}.json`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      } else {
-        setError('Failed to export data')
+      setIsUploadingImage(true)
+      setError(null)
+
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/profile/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload image')
       }
+
+      const updatedProfile = await response.json()
+      setProfile(updatedProfile)
     } catch (err) {
-      setError('Failed to export data')
-      console.error('Error exporting data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to upload image')
+      console.error('Error uploading image:', err)
+    } finally {
+      setIsUploadingImage(false)
     }
   }
 
@@ -311,24 +333,46 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      {profile?.image ? (
-                        <img
-                          src={profile.image}
-                          alt={profile.name || 'Profile'}
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white font-bold text-2xl">
-                          {profile?.name?.charAt(0) || 'U'}
-                        </span>
-                      )}
+                    <div className="relative group">
+                      <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
+                        {profile?.image ? (
+                          <img
+                            src={profile.image}
+                            alt={profile.name || 'Profile'}
+                            className="w-20 h-20 rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-2xl">
+                            {profile?.name?.charAt(0) || 'U'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={isUploadingImage}
+                            className="hidden"
+                          />
+                          {isUploadingImage ? (
+                            <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                          ) : (
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          )}
+                        </label>
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-white">
                         {profile?.name || 'No name set'}
                       </h3>
                       <p className="text-white/70">{profile?.email}</p>
+                      <p className="text-white/50 text-sm">Click on image to upload new photo</p>
                     </div>
                   </div>
 
@@ -372,22 +416,6 @@ export default function ProfilePage() {
                   <span className="text-white/70">Preferences</span>
                 </Link>
                 
-                <button className="flex items-center space-x-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors w-full">
-                  <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span className="text-white/70">Change Password</span>
-                </button>
-                
-                <button 
-                  onClick={handleExportData}
-                  className="flex items-center space-x-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors w-full"
-                >
-                  <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  <span className="text-white/70">Export Data</span>
-                </button>
               </div>
             </div>
 
