@@ -62,6 +62,10 @@ export default function NewsWidget() {
         const sortedArticles = allArticles
           .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
           .slice(0, 10)
+          .map((article, index) => ({
+            ...article,
+            id: `${article.id}-${index}` // Ensure unique IDs for combined articles
+          }))
         
         setNews(sortedArticles)
       } else {
