@@ -34,15 +34,10 @@ export async function GET() {
       const preferences = await prisma.userPreferences.create({
         data: {
           userId: user.id,
+          theme: 'dark',
           monthlyBudget: 2000.0,
           currency: 'USD',
-          newsCategories: ['technology', 'business', 'health'],
-          widgetStyle: {
-            layout: 'grid',
-            cardStyle: 'glass',
-            widgetSize: 'medium',
-            showAnimations: true
-          }
+          newsCategories: ['technology', 'business', 'health']
         }
       })
       return NextResponse.json(preferences)
@@ -65,7 +60,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { monthlyBudget, currency, weatherLocation, newsCategories, widgetStyle, dashboardLayout } = body
+    const { theme, monthlyBudget, currency, weatherLocation, newsCategories, dashboardLayout } = body
 
     // Find user
     const user = await prisma.user.findUnique({
@@ -80,25 +75,20 @@ export async function PUT(request: NextRequest) {
     const preferences = await prisma.userPreferences.upsert({
       where: { userId: user.id },
       update: {
+        ...(theme && { theme }),
         ...(monthlyBudget !== undefined && { monthlyBudget: parseFloat(monthlyBudget) }),
         ...(currency && { currency }),
         ...(weatherLocation && { weatherLocation }),
         ...(newsCategories && { newsCategories }),
-        ...(widgetStyle && { widgetStyle }),
         ...(dashboardLayout && { dashboardLayout })
       },
       create: {
         userId: user.id,
+        theme: theme || 'dark',
         monthlyBudget: monthlyBudget ? parseFloat(monthlyBudget) : 2000.0,
         currency: currency || 'USD',
         weatherLocation: weatherLocation || null,
         newsCategories: newsCategories || ['technology', 'business', 'health'],
-        widgetStyle: widgetStyle || {
-          layout: 'grid',
-          cardStyle: 'glass',
-          widgetSize: 'medium',
-          showAnimations: true
-        },
         dashboardLayout: dashboardLayout || null
       }
     })

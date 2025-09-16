@@ -122,12 +122,10 @@ model Expense {
 
 model UserPreferences {
   id              String  @id @default(cuid())
+  theme           String  @default("dark")
   dashboardLayout Json?
   weatherLocation String?
   newsCategories  String[]
-  
-  // Widget display preferences
-  widgetStyle     Json    @default("{\"layout\":\"grid\",\"cardStyle\":\"glass\",\"widgetSize\":\"medium\",\"showAnimations\":true}")
   
   // Financial preferences
   monthlyBudget   Float?  @default(2000.0)

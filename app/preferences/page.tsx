@@ -7,16 +7,11 @@ import Link from 'next/link'
 
 interface UserPreferences {
   id: string
+  theme: string
   monthlyBudget: number
   currency: string
   weatherLocation?: string
   newsCategories: string[]
-  widgetStyle: {
-    layout: 'grid' | 'list' | 'compact'
-    cardStyle: 'glass' | 'solid' | 'minimal'
-    widgetSize: 'small' | 'medium' | 'large'
-    showAnimations: boolean
-  }
   dashboardLayout?: any
 }
 
@@ -44,24 +39,6 @@ export default function PreferencesPage() {
     'entertainment', 'politics', 'world', 'local'
   ]
 
-  const widgetLayoutOptions = [
-    { value: 'grid', label: 'Grid Layout', description: 'Traditional grid with cards' },
-    { value: 'list', label: 'List Layout', description: 'Vertical list of widgets' },
-    { value: 'compact', label: 'Compact Layout', description: 'Dense, space-efficient view' }
-  ]
-
-  const cardStyleOptions = [
-    { value: 'glass', label: 'Glass Morphism', description: 'Translucent with blur effects' },
-    { value: 'solid', label: 'Solid Cards', description: 'Solid background with borders' },
-    { value: 'minimal', label: 'Minimal', description: 'Clean, minimal design' }
-  ]
-
-  const widgetSizeOptions = [
-    { value: 'small', label: 'Small', description: 'Compact widgets' },
-    { value: 'medium', label: 'Medium', description: 'Standard size' },
-    { value: 'large', label: 'Large', description: 'Larger, more detailed widgets' }
-  ]
-
   // Fetch preferences on component mount
   useEffect(() => {
     if (status === 'loading') return
@@ -82,15 +59,6 @@ export default function PreferencesPage() {
         throw new Error('Failed to fetch preferences')
       }
       const data = await response.json()
-      // Ensure widgetStyle has default values if not present
-      if (!data.widgetStyle) {
-        data.widgetStyle = {
-          layout: 'grid',
-          cardStyle: 'glass',
-          widgetSize: 'medium',
-          showAnimations: true
-        }
-      }
       setPreferences(data)
     } catch (err) {
       setError('Failed to load preferences')
@@ -139,17 +107,6 @@ export default function PreferencesPage() {
   const updatePreference = (key: keyof UserPreferences, value: any) => {
     if (!preferences) return
     setPreferences({ ...preferences, [key]: value })
-  }
-
-  const updateWidgetStyle = (key: keyof UserPreferences['widgetStyle'], value: any) => {
-    if (!preferences) return
-    setPreferences({
-      ...preferences,
-      widgetStyle: {
-        ...preferences.widgetStyle,
-        [key]: value
-      }
-    })
   }
 
   if (status === 'loading' || loading) {
@@ -244,105 +201,27 @@ export default function PreferencesPage() {
               </div>
             </div>
 
-            {/* Widget Display Settings */}
+            {/* Appearance Settings */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                <span className="text-2xl mr-3">🎛️</span>
-                Widget Display
+                <span className="text-2xl mr-3">🎨</span>
+                Appearance
               </h2>
               
               <div className="space-y-6">
-                {/* Layout Style */}
                 <div>
-                  <label className="block text-white/70 text-sm font-medium mb-3">
-                    Layout Style
+                  <label className="block text-white/70 text-sm font-medium mb-2">
+                    Theme
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {widgetLayoutOptions.map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateWidgetStyle('layout', option.value)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          preferences.widgetStyle.layout === option.value
-                            ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                            : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40 hover:bg-white/10'
-                        }`}
-                      >
-                        <div className="font-medium text-sm mb-1">{option.label}</div>
-                        <div className="text-xs opacity-75">{option.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Card Style */}
-                <div>
-                  <label className="block text-white/70 text-sm font-medium mb-3">
-                    Card Style
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {cardStyleOptions.map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateWidgetStyle('cardStyle', option.value)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          preferences.widgetStyle.cardStyle === option.value
-                            ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                            : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40 hover:bg-white/10'
-                        }`}
-                      >
-                        <div className="font-medium text-sm mb-1">{option.label}</div>
-                        <div className="text-xs opacity-75">{option.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Widget Size */}
-                <div>
-                  <label className="block text-white/70 text-sm font-medium mb-3">
-                    Widget Size
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {widgetSizeOptions.map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateWidgetStyle('widgetSize', option.value)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          preferences.widgetStyle.widgetSize === option.value
-                            ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                            : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40 hover:bg-white/10'
-                        }`}
-                      >
-                        <div className="font-medium text-sm mb-1">{option.label}</div>
-                        <div className="text-xs opacity-75">{option.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Animations Toggle */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="block text-white/70 text-sm font-medium">
-                      Show Animations
-                    </label>
-                    <p className="text-white/50 text-xs mt-1">
-                      Enable hover effects and transitions
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => updateWidgetStyle('showAnimations', !preferences.widgetStyle.showAnimations)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      preferences.widgetStyle.showAnimations ? 'bg-blue-500' : 'bg-white/20'
-                    }`}
+                  <select
+                    value={preferences.theme}
+                    onChange={(e) => updatePreference('theme', e.target.value)}
+                    className="w-full bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2"
                   >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        preferences.widgetStyle.showAnimations ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                    <option value="dark" className="bg-gray-800">Dark</option>
+                    <option value="light" className="bg-gray-800">Light</option>
+                    <option value="auto" className="bg-gray-800">Auto</option>
+                  </select>
                 </div>
               </div>
             </div>
