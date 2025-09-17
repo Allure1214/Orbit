@@ -371,6 +371,31 @@ export default function PreferencesPage() {
                       <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
+
+                  {/* Currency Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-purple-400 text-lg">💱</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Currency Tracker</h3>
+                        <p className="text-white/50 text-sm">Real-time exchange rates</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.currency ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          currency: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

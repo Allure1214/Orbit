@@ -133,7 +133,7 @@ model UserPreferences {
   currency        String  @default("USD")
   
   // Widget preferences
-  enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true}")
+  enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true,\"currency\":true}")
   
   // Relations
   userId          String  @unique

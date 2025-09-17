@@ -10,6 +10,7 @@ import FinanceWidget from '@/components/widgets/FinanceWidget'
 import NewsWidget from '@/components/widgets/NewsWidget'
 import F1Widget from '@/components/widgets/F1Widget'
 import NotesWidget from '@/components/widgets/NotesWidget'
+import CurrencyWidget from '@/components/widgets/CurrencyWidget'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -82,6 +83,7 @@ export default async function DashboardPage() {
           {enabledWidgets.news && <NewsWidget />}
           {enabledWidgets.f1 && <F1Widget />}
           {enabledWidgets.notes && <NotesWidget />}
+          {enabledWidgets.currency && <CurrencyWidget />}
         </div>
       </div>
     </div>
