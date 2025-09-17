@@ -13,6 +13,14 @@ interface Event {
   location?: string
   color: string
   type: string
+  googleEventId?: string
+  googleCalendarId?: string
+}
+
+interface GoogleCalendarStatus {
+  enabled: boolean
+  synced: boolean
+  calendarId?: string
 }
 
 export default function CalendarWidget() {
@@ -23,6 +31,11 @@ export default function CalendarWidget() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [view, setView] = useState<'month' | 'week' | 'day'>('month')
   const [filterType, setFilterType] = useState('ALL')
+  const [googleCalendarStatus, setGoogleCalendarStatus] = useState<GoogleCalendarStatus>({
+    enabled: false,
+    synced: false
+  })
+  const [syncing, setSyncing] = useState(false)
 
   const eventTypes = [
     { value: 'ALL', label: 'All Events', color: '#6B7280' },
@@ -32,7 +45,8 @@ export default function CalendarWidget() {
     { value: 'DEADLINE', label: 'Deadline', color: '#EF4444' },
     { value: 'BIRTHDAY', label: 'Birthday', color: '#EC4899' },
     { value: 'HOLIDAY', label: 'Holiday', color: '#8B5CF6' },
-    { value: 'F1_RACE', label: 'F1 Race', color: '#DC2626' }
+    { value: 'F1_RACE', label: 'F1 Race', color: '#DC2626' },
+    { value: 'GOOGLE_CALENDAR', label: 'Google Calendar', color: '#4285F4' }
   ]
 
   const fetchEvents = async () => {
@@ -68,8 +82,79 @@ export default function CalendarWidget() {
     }
   }
 
+  const fetchGoogleCalendarStatus = async () => {
+    try {
+      const response = await fetch('/api/preferences')
+      if (response.ok) {
+        const prefs = await response.json()
+        setGoogleCalendarStatus({
+          enabled: prefs.googleCalendarEnabled || false,
+          synced: prefs.googleCalendarSync || false,
+          calendarId: prefs.googleCalendarId
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching Google Calendar status:', error)
+    }
+  }
+
+  const connectGoogleCalendar = () => {
+    // Redirect to Google OAuth
+    window.location.href = '/api/auth/google-calendar'
+  }
+
+  const syncGoogleCalendar = async () => {
+    setSyncing(true)
+    try {
+      const response = await fetch('/api/calendar/google-sync', {
+        method: 'GET'
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        setGoogleCalendarStatus(prev => ({ ...prev, synced: true }))
+        // Refresh events to show synced ones
+        fetchEvents()
+      } else {
+        throw new Error('Failed to sync Google Calendar')
+      }
+    } catch (error) {
+      console.error('Error syncing Google Calendar:', error)
+      setError('Failed to sync Google Calendar')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  const disconnectGoogleCalendar = async () => {
+    try {
+      const response = await fetch('/api/calendar/google-sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'disconnect' })
+      })
+      
+      if (response.ok) {
+        setGoogleCalendarStatus({
+          enabled: false,
+          synced: false
+        })
+        // Refresh events to remove Google Calendar events
+        fetchEvents()
+      } else {
+        throw new Error('Failed to disconnect Google Calendar')
+      }
+    } catch (error) {
+      console.error('Error disconnecting Google Calendar:', error)
+      setError('Failed to disconnect Google Calendar')
+    }
+  }
+
   useEffect(() => {
     fetchEvents()
+    fetchGoogleCalendarStatus()
   }, [selectedDate, filterType])
 
   const handleAddEvent = async (eventData: Partial<Event>) => {
@@ -193,6 +278,35 @@ export default function CalendarWidget() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white">Calendar</h3>
         <div className="flex items-center space-x-2">
+          {/* Google Calendar Integration */}
+          {!googleCalendarStatus.enabled ? (
+            <button
+              onClick={connectGoogleCalendar}
+              className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+              title="Connect Google Calendar"
+            >
+              Connect Google
+            </button>
+          ) : (
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={syncGoogleCalendar}
+                disabled={syncing}
+                className="px-3 py-1 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors text-sm disabled:opacity-50"
+                title="Sync Google Calendar"
+              >
+                {syncing ? 'Syncing...' : 'Sync'}
+              </button>
+              <button
+                onClick={disconnectGoogleCalendar}
+                className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
+                title="Disconnect Google Calendar"
+              >
+                ×
+              </button>
+            </div>
+          )}
+          
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"

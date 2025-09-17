@@ -85,6 +85,7 @@ export default async function DashboardPage() {
         
         {/* Main Widgets Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {enabledWidgets.pomodoro && <PomodoroWidget />}
           {enabledWidgets.tasks && <TaskWidget />}
           {enabledWidgets.weather && <WeatherWidget />}
           {enabledWidgets.finance && <FinanceWidget />}
@@ -93,7 +94,6 @@ export default async function DashboardPage() {
           {enabledWidgets.notes && <NotesWidget />}
           {enabledWidgets.currency && <CurrencyWidget />}
           {enabledWidgets.calendar && <CalendarWidget />}
-          {enabledWidgets.pomodoro && <PomodoroWidget />}
         </div>
       </div>
     </div>

@@ -49,6 +49,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
+  // Google Calendar integration tokens
+  googleAccessToken   String?
+  googleRefreshToken  String?
+  
   // NextAuth relations
   accounts      Account[]
   sessions      Session[]
@@ -136,6 +140,11 @@ model UserPreferences {
   // Widget preferences
   enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true,\"currency\":true,\"calendar\":true,\"pomodoro\":true}")
   
+  // Google Calendar integration
+  googleCalendarEnabled  Boolean @default(false)
+  googleCalendarSync     Boolean @default(false)
+  googleCalendarId       String?
+  
   // Relations
   userId          String  @unique
   user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -168,6 +177,10 @@ model Event {
   type        EventType @default(PERSONAL)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  
+  // Google Calendar integration
+  googleEventId     String?
+  googleCalendarId  String?
   
   // Relations
   userId      String
@@ -229,5 +242,6 @@ enum EventType {
   BIRTHDAY
   HOLIDAY
   F1_RACE
+  GOOGLE_CALENDAR
   OTHER
 }
