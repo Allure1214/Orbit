@@ -18,6 +18,12 @@ export default function DashboardHeader() {
   const { data: session } = useSession()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [checkInData, setCheckInData] = useState<{
+    currentStreak: number
+    checkedInToday: boolean
+    totalCheckIns: number
+  } | null>(null)
+  const [isCheckingIn, setIsCheckingIn] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Fetch profile data to get updated image
@@ -38,6 +44,59 @@ export default function DashboardHeader() {
 
     fetchProfile()
   }, [session])
+
+  // Fetch check-in data
+  useEffect(() => {
+    const fetchCheckInData = async () => {
+      if (session?.user) {
+        try {
+          const response = await fetch('/api/checkin')
+          if (response.ok) {
+            const data = await response.json()
+            setCheckInData(data)
+          }
+        } catch (error) {
+          console.error('Error fetching check-in data:', error)
+        }
+      }
+    }
+
+    fetchCheckInData()
+  }, [session])
+
+  // Handle check-in
+  const handleCheckIn = async () => {
+    if (isCheckingIn || !session?.user) return
+
+    setIsCheckingIn(true)
+    try {
+      const response = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCheckInData(data)
+      } else {
+        const error = await response.json()
+        if (error.error === 'Already checked in today') {
+          // Still update the data to show current status
+          const getResponse = await fetch('/api/checkin')
+          if (getResponse.ok) {
+            const data = await getResponse.json()
+            setCheckInData(data)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking in:', error)
+    } finally {
+      setIsCheckingIn(false)
+    }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -79,16 +138,44 @@ export default function DashboardHeader() {
           <div className="flex items-center space-x-4">
             {/* Quick Actions */}
             <div className="hidden md:flex items-center space-x-2">
-              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 1 0-15 0v5h5l-5 5-5-5h5V7a7.5 7.5 0 1 1 15 0v10z" />
-                </svg>
+              {/* Check-in Button */}
+              <button
+                onClick={handleCheckIn}
+                disabled={isCheckingIn || checkInData?.checkedInToday}
+                className={`p-2 rounded-lg transition-colors ${
+                  checkInData?.checkedInToday
+                    ? 'text-green-400 bg-green-500/20 cursor-not-allowed'
+                    : isCheckingIn
+                    ? 'text-white/50 bg-white/5 cursor-not-allowed'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+                title={
+                  checkInData?.checkedInToday
+                    ? `Already checked in today! Streak: ${checkInData.currentStreak} days`
+                    : 'Check in for today'
+                }
+              >
+                {isCheckingIn ? (
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                ) : checkInData?.checkedInToday ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
               </button>
-              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 1 0-15 0v5h5l-5 5-5-5h5V7a7.5 7.5 0 1 1 15 0v10z" />
-                </svg>
-              </button>
+              
+              {/* Streak Display */}
+              {checkInData && (
+                <div className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-lg text-sm font-medium">
+                  🔥 {checkInData.currentStreak}
+                </div>
+              )}
             </div>
 
             {/* Profile Dropdown */}

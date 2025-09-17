@@ -72,30 +72,10 @@ export default function QuickStats() {
         const notesResponse = await fetch('/api/notes')
         const notes = notesResponse.ok ? await notesResponse.json() : []
 
-        // Calculate current streak (simplified - consecutive days with completed tasks)
-        const today = new Date()
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date(today)
-          date.setDate(date.getDate() - i)
-          return date.toISOString().split('T')[0]
-        })
-
-        const tasksByDate = tasks.reduce((acc: any, task: any) => {
-          if (task.completed && task.completedAt) {
-            const date = new Date(task.completedAt).toISOString().split('T')[0]
-            if (last7Days.includes(date)) {
-              acc[date] = (acc[date] || 0) + 1
-            }
-          }
-          return acc
-        }, {})
-
-        const currentStreak = last7Days.reduce((streak, date) => {
-          if (tasksByDate[date] > 0) {
-            return streak + 1
-          }
-          return streak
-        }, 0)
+        // Fetch check-in data for streak calculation
+        const checkInResponse = await fetch('/api/checkin')
+        const checkInData = checkInResponse.ok ? await checkInResponse.json() : { currentStreak: 0 }
+        const currentStreak = checkInData.currentStreak || 0
 
         setStats({
           tasksCompleted: completedTasks,

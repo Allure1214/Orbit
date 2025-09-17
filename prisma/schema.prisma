@@ -59,6 +59,7 @@ model User {
   expenses      Expense[]
   achievements  UserAchievement[]
   preferences   UserPreferences?
+  checkIns      CheckIn[]
   
   @@map("users")
 }
@@ -139,6 +140,19 @@ model UserPreferences {
   user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("user_preferences")
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  
+  // Relations
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date])
+  @@map("check_ins")
 }
 
 model Achievement {
