@@ -346,60 +346,90 @@ export default function FinanceWidget() {
         </div>
       )}
 
-      {/* Pie Chart */}
-      {showChart && chartData.length > 0 && (
+      {/* Category Visualization - Either Chart or List */}
+      {showChart ? (
+        /* Pie Chart View */
+        chartData.length > 0 && (
+          <div className="mb-6">
+            <h4 className="text-white/70 text-sm font-medium mb-3">Spending by Category</h4>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => (
+                      <text 
+                        x={0} 
+                        y={0} 
+                        textAnchor="middle" 
+                        dominantBaseline="central"
+                        fill="white"
+                        fontSize="12"
+                        fontWeight="600"
+                        style={{
+                          textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                          filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.8))'
+                        }}
+                      >
+                        {`${name} ${(percent * 100).toFixed(0)}%`}
+                      </text>
+                    )}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toFixed(2)}`, 'Amount']}
+                    contentStyle={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }}
+                    labelStyle={{
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ 
+                      color: 'white', 
+                      fontSize: '12px',
+                      fontWeight: '500'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )
+      ) : (
+        /* List View */
         <div className="mb-6">
           <h4 className="text-white/70 text-sm font-medium mb-3">Spending by Category</h4>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toFixed(2)}`, 'Amount']}
-                  contentStyle={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    color: 'white'
-                  }}
-                />
-                <Legend 
-                  wrapperStyle={{ color: 'white', fontSize: '12px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="space-y-2">
+            {categoryTotals.map((cat, index) => (
+              <div key={cat.category} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${getCategoryColor(cat.category)}`}></div>
+                  <span className="text-white text-sm">{cat.label}</span>
+                </div>
+                <span className="text-white font-medium">{getCurrencySymbol(currency)}{cat.total.toFixed(2)}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
-
-      {/* Category Breakdown */}
-      <div className="mb-6">
-        <h4 className="text-white/70 text-sm font-medium mb-3">Spending by Category</h4>
-        <div className="space-y-2">
-          {categoryTotals.map((cat, index) => (
-            <div key={cat.category} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${getCategoryColor(cat.category)}`}></div>
-                <span className="text-white text-sm">{cat.label}</span>
-              </div>
-              <span className="text-white font-medium">{getCurrencySymbol(currency)}{cat.total.toFixed(2)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Recent Expenses */}
       <div>
