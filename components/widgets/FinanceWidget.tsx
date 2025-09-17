@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import * as XLSX from 'xlsx'
 
 interface Expense {
   id: string
@@ -18,6 +20,7 @@ export default function FinanceWidget() {
   const [error, setError] = useState<string | null>(null)
   const [newExpense, setNewExpense] = useState({ amount: '', description: '', category: 'FOOD' as const, date: '' })
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showChart, setShowChart] = useState(false)
 
   const categories = [
     { value: 'FOOD', label: 'Food' },
@@ -109,6 +112,35 @@ export default function FinanceWidget() {
     return symbols[currency] || '$'
   }
 
+  // Prepare data for Excel export
+  const exportToExcel = () => {
+    const exportData = expenses.map(expense => ({
+      'Date': new Date(expense.date).toLocaleDateString(),
+      'Description': expense.description,
+      'Category': getCategoryLabel(expense.category),
+      'Amount': expense.amount,
+      'Currency': currency
+    }))
+
+    // Add summary row
+    const summaryData = [
+      { 'Date': '', 'Description': 'TOTAL EXPENSES', 'Category': '', 'Amount': totalExpenses, 'Currency': currency },
+      { 'Date': '', 'Description': 'MONTHLY BUDGET', 'Category': '', 'Amount': monthlyBudget, 'Currency': currency },
+      { 'Date': '', 'Description': 'REMAINING BUDGET', 'Category': '', 'Amount': remainingBudget, 'Currency': currency }
+    ]
+
+    const allData = [...exportData, ...summaryData]
+    
+    const ws = XLSX.utils.json_to_sheet(allData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Expenses')
+    
+    const fileName = `expenses_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, fileName)
+  }
+
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316']
+
   const addExpense = async () => {
     if (!newExpense.amount || !newExpense.description) return
 
@@ -188,6 +220,13 @@ export default function FinanceWidget() {
     )
   }
 
+  // Prepare data for pie chart
+  const chartData = categoryTotals.map(cat => ({
+    name: cat.label,
+    value: cat.total,
+    color: getCategoryColor(cat.category).replace('bg-', '')
+  }))
+
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
       <div className="flex items-center justify-between mb-6">
@@ -195,14 +234,36 @@ export default function FinanceWidget() {
           <h3 className="text-xl font-bold text-white mb-1">Finance</h3>
           <p className="text-white/70 text-sm">Track your expenses</p>
         </div>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={exportToExcel}
+            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            title="Export to Excel"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowChart(!showChart)}
+            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            title="Toggle Chart View"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            title="Add Expense"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Budget Overview */}
@@ -281,6 +342,45 @@ export default function FinanceWidget() {
             >
               Add Expense
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pie Chart */}
+      {showChart && chartData.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-white/70 text-sm font-medium mb-3">Spending by Category</h4>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => [`${getCurrencySymbol(currency)}${value.toFixed(2)}`, 'Amount']}
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ color: 'white', fontSize: '12px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
