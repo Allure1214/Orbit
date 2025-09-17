@@ -51,7 +51,8 @@ export default async function DashboardPage() {
           finance: true,
           news: true,
           f1: true,
-          notes: true
+          notes: true,
+          currency: true
         } as any
       }
     })
@@ -64,7 +65,8 @@ export default async function DashboardPage() {
     finance: true,
     news: true,
     f1: true,
-    notes: true
+    notes: true,
+    currency: true
   }
   
   return (
