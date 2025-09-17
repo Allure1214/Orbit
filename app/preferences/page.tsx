@@ -396,6 +396,56 @@ export default function PreferencesPage() {
                       <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
+
+                  {/* Calendar Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-400 text-lg">📅</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Calendar</h3>
+                        <p className="text-white/50 text-sm">Events & schedule management</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.calendar ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          calendar: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Pomodoro Widget */}
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                        <span className="text-orange-400 text-lg">⏰</span>
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Pomodoro Timer</h3>
+                        <p className="text-white/50 text-sm">Focus & productivity timer</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences.enabledWidgets?.pomodoro ?? true}
+                        onChange={(e) => updatePreference('enabledWidgets', {
+                          ...preferences.enabledWidgets,
+                          pomodoro: e.target.checked
+                        })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

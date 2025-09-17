@@ -60,6 +60,7 @@ model User {
   achievements  UserAchievement[]
   preferences   UserPreferences?
   checkIns      CheckIn[]
+  events        Event[]
   
   @@map("users")
 }
@@ -133,7 +134,7 @@ model UserPreferences {
   currency        String  @default("USD")
   
   // Widget preferences
-  enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true,\"currency\":true}")
+  enabledWidgets  Json?   @default("{\"tasks\":true,\"weather\":true,\"finance\":true,\"news\":true,\"f1\":true,\"notes\":true,\"currency\":true,\"calendar\":true,\"pomodoro\":true}")
   
   // Relations
   userId          String  @unique
@@ -153,6 +154,26 @@ model CheckIn {
   
   @@unique([userId, date])
   @@map("check_ins")
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean   @default(false)
+  location    String?
+  color       String    @default("#3B82F6")
+  type        EventType @default(PERSONAL)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("events")
 }
 
 model Achievement {
@@ -197,5 +218,16 @@ enum ExpenseCategory {
   BILLS
   HEALTHCARE
   EDUCATION
+  OTHER
+}
+
+enum EventType {
+  PERSONAL
+  WORK
+  MEETING
+  DEADLINE
+  BIRTHDAY
+  HOLIDAY
+  F1_RACE
   OTHER
 }

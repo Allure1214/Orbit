@@ -11,6 +11,8 @@ import NewsWidget from '@/components/widgets/NewsWidget'
 import F1Widget from '@/components/widgets/F1Widget'
 import NotesWidget from '@/components/widgets/NotesWidget'
 import CurrencyWidget from '@/components/widgets/CurrencyWidget'
+import CalendarWidget from '@/components/widgets/CalendarWidget'
+import PomodoroWidget from '@/components/widgets/PomodoroWidget'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -52,7 +54,9 @@ export default async function DashboardPage() {
           news: true,
           f1: true,
           notes: true,
-          currency: true
+          currency: true,
+          calendar: true,
+          pomodoro: true
         } as any
       }
     })
@@ -66,7 +70,9 @@ export default async function DashboardPage() {
     news: true,
     f1: true,
     notes: true,
-    currency: true
+    currency: true,
+    calendar: true,
+    pomodoro: true
   }
   
   return (
@@ -86,6 +92,8 @@ export default async function DashboardPage() {
           {enabledWidgets.f1 && <F1Widget />}
           {enabledWidgets.notes && <NotesWidget />}
           {enabledWidgets.currency && <CurrencyWidget />}
+          {enabledWidgets.calendar && <CalendarWidget />}
+          {enabledWidgets.pomodoro && <PomodoroWidget />}
         </div>
       </div>
     </div>
